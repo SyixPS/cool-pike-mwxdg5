@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Tentacle Particle Effect</title>
+    <title>Electric Tentacle Effect</title>
     <style>
         body {
             margin: 0;
@@ -46,8 +46,8 @@
             reset() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.velX = Math.random() * 2 - 1;
-                this.velY = Math.random() * 2 - 1;
+                this.velX = (Math.random() * 4 - 2) * 2; // 10x speed
+                this.velY = (Math.random() * 4 - 2) * 2; // 10x speed
             }
 
             update() {
@@ -63,15 +63,15 @@
                 const dy = mouseY - this.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
 
-                if (distance < 150) {
-                    const force = (150 - distance) / 150;
-                    this.velX += (dx / distance) * force * 0.5;
-                    this.velY += (dy / distance) * force * 0.5;
+                if (distance < 300) { // 10x interaction range
+                    const force = (300 - distance) / 300;
+                    this.velX += (dx / distance) * force * 2; // 10x force
+                    this.velY += (dy / distance) * force * 2; // 10x force
                 }
 
                 // Friction
-                this.velX *= 0.99;
-                this.velY *= 0.99;
+                this.velX *= 0.95;
+                this.velY *= 0.95;
             }
 
             draw() {
@@ -82,26 +82,38 @@
             }
         }
 
-        // Create particles
+        // Create particles (10x more particles)
         const particles = [];
-        const particleCount = 100;
+        const particleCount = 1000; // 10x particle count
         for (let i = 0; i < particleCount; i++) {
             particles.push(new Particle());
         }
 
-        // Draw tentacle connections
-        function drawConnections() {
+        // Draw electric tentacle connections
+        function drawElectricTentacles() {
             particles.forEach(particle => {
                 const dx = mouseX - particle.x;
                 const dy = mouseY - particle.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
 
-                if (distance < 150) {
+                if (distance < 300) { // 10x interaction range
                     ctx.beginPath();
-                    ctx.strokeStyle = `rgba(0, 255, 0, ${1 - distance/150})`;
-                    ctx.lineWidth = 0.5;
-                    ctx.moveTo(particle.x, particle.y);
-                    ctx.lineTo(mouseX, mouseY);
+                    ctx.strokeStyle = `rgba(0, 255, 0, ${1 - distance/300})`;
+                    ctx.lineWidth = 1.5;
+
+                    // Add randomness to simulate electric arcs
+                    const segments = 10;
+                    let lastX = particle.x;
+                    let lastY = particle.y;
+                    for (let i = 1; i <= segments; i++) {
+                        const t = i / segments;
+                        const midX = lastX + (mouseX - lastX) * t + (Math.random() - 0.5) * 50; // Random jitter
+                        const midY = lastY + (mouseY - lastY) * t + (Math.random() - 0.5) * 50; // Random jitter
+                        ctx.moveTo(lastX, lastY);
+                        ctx.lineTo(midX, midY);
+                        lastX = midX;
+                        lastY = midY;
+                    }
                     ctx.stroke();
                 }
             });
@@ -116,7 +128,7 @@
                 particle.draw();
             });
             
-            drawConnections();
+            drawElectricTentacles();
             requestAnimationFrame(animate);
         }
 
