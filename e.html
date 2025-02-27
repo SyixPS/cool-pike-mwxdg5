@@ -3,103 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vanilla JS Counter</title>
+    <title>Sports Team Randomizer</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
         body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            font-family: Arial, sans-serif;
+            background: #f0f2f5;
+            padding: 2rem;
         }
 
-        .counter {
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #2c3e50;
             text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2.5em;
         }
 
-        .count-display {
-            font-size: 4rem;
-            margin: 20px;
-            min-width: 120px;
+        .input-section {
+            margin-bottom: 2rem;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            resize: vertical;
+            min-height: 150px;
+            margin-bottom: 1rem;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
         button {
-            font-size: 1.5rem;
-            padding: 10px 20px;
-            margin: 5px;
-            cursor: pointer;
+            padding: 0.8rem 1.5rem;
             border: none;
-            border-radius: 5px;
-            background-color: #007bff;
+            border-radius: 8px;
+            background: #3498db;
             color: white;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
         }
 
         button:hover {
-            background-color: #0056b3;
+            transform: translateY(-2px);
+            background: #2980b9;
         }
 
-        .reset-btn {
-            background-color: #dc3545;
+        .teams-container {
+            display: grid;
+            gap: 1.5rem;
+            margin-top: 2rem;
         }
 
-        .reset-btn:hover {
-            background-color: #c82333;
+        .team {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            transform: translateY(20px);
+            opacity: 0;
+            animation: slideUp 0.4s ease forwards;
+        }
+
+        .team h3 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        .team-member {
+            padding: 0.5rem;
+            margin: 0.3rem 0;
+            background: white;
+            border-radius: 5px;
+            transform: scale(0);
+            animation: popIn 0.3s ease forwards;
+        }
+
+        @keyframes slideUp {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes popIn {
+            to {
+                transform: scale(1);
+            }
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="counter">
-        <div class="count-display" id="count">0</div>
-        <button id="decrement">-</button>
-        <button id="increment">+</button>
-        <button class="reset-btn" id="reset">Reset</button>
+    <div class="container">
+        <h1>🏀 Sports Team Randomizer</h1>
+        
+        <div class="input-section">
+            <textarea id="namesInput" placeholder="Enter names separated by commas or new lines..."></textarea>
+            <div class="buttons">
+                <button onclick="generateTeams(2)">Make 2 Teams</button>
+                <button onclick="generateTeams(4)">Make 4 Teams</button>
+                <button onclick="generateTeams(6)">Make 6 Teams</button>
+            </div>
+        </div>
+
+        <div id="teamsContainer" class="teams-container"></div>
     </div>
 
     <script>
-        // Select elements
-        const countDisplay = document.getElementById('count');
-        const incrementBtn = document.getElementById('increment');
-        const decrementBtn = document.getElementById('decrement');
-        const resetBtn = document.getElementById('reset');
+        function generateTeams(teamCount) {
+            const namesInput = document.getElementById('namesInput').value;
+            const names = namesInput.split(/[\n,]+/).map(name => name.trim()).filter(name => name);
+            
+            if (names.length === 0) {
+                alert('Please enter some names!');
+                return;
+            }
 
-        // Initialize count
-        let count = localStorage.getItem('counter') ? 
-            parseInt(localStorage.getItem('counter')) : 0;
-        countDisplay.textContent = count;
+            // Shuffle names
+            const shuffledNames = [...names].sort(() => Math.random() - 0.5);
+            
+            // Create teams
+            const teams = [];
+            for (let i = 0; i < teamCount; i++) {
+                teams.push([]);
+            }
+            
+            shuffledNames.forEach((name, index) => {
+                teams[index % teamCount].push(name);
+            });
 
-        // Update display and storage
-        function updateDisplay() {
-            countDisplay.textContent = count;
-            localStorage.setItem('counter', count);
+            displayTeams(teams);
         }
 
-        // Event listeners
-        incrementBtn.addEventListener('click', () => {
-            count++;
-            updateDisplay();
-        });
+        function displayTeams(teams) {
+            const container = document.getElementById('teamsContainer');
+            container.innerHTML = '';
 
-        decrementBtn.addEventListener('click', () => {
-            count--;
-            updateDisplay();
-        });
-
-        resetBtn.addEventListener('click', () => {
-            count = 0;
-            updateDisplay();
-        });
-
-        // Keyboard support
-        document.addEventListener('keydown', (e) => {
-            if (e.key === '+') {
-                count++;
-                updateDisplay();
-            } else if (e.key === '-') {
-                count--;
-                updateDisplay();
-            }
-        });
+            teams.forEach((team, index) => {
+                const teamDiv = document.createElement('div');
+                teamDiv.className = 'team';
+                teamDiv.innerHTML = `
+                    <h3>Team ${index + 1}</h3>
+                    ${team.map(member => `
+                        <div class="team-member">${member}</div>
+                    `).join('')}
+                `;
+                container.appendChild(teamDiv);
+            });
+        }
     </script>
 </body>
 </html>
