@@ -36,12 +36,12 @@
             font-size: 2.8rem;
             font-weight: 600;
             letter-spacing: -0.5px;
-            background: linear-gradient(45deg, #8A2BE2, #9400D3);
+            background: linear-gradient(45deg, #8A2BE2, #9400D3, #6A1B9A);
+            background-size: 200% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            opacity: 0;
-            transform: translateY(-20px);
-            animation: fadeSlideDown 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+            animation: gradientFlow 4s linear infinite;
+            text-shadow: 0 0 15px rgba(138, 43, 226, 0.4);
         }
 
         .input-section {
@@ -63,7 +63,25 @@
             transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
         }
 
-        textarea:focus {
+        .custom-team-input {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .custom-team-input input {
+            width: 100px;
+            padding: 0.8rem;
+            background: rgba(40, 40, 40, 0.8);
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            border-radius: 8px;
+            color: #ffffff;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .custom-team-input input:focus {
             outline: none;
             border-color: #8A2BE2;
             box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.2);
@@ -87,6 +105,20 @@
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
             transform: scale(1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            animation: buttonGlow 2s infinite;
         }
 
         button:hover {
@@ -108,6 +140,18 @@
             opacity: 0;
             transform: translateY(20px);
             animation: teamEntry 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+            position: relative;
+        }
+
+        .team::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(138, 43, 226, 0.1), transparent);
+            animation: teamGlow 2s infinite;
         }
 
         .team h3 {
@@ -115,6 +159,7 @@
             margin-bottom: 1.2rem;
             font-size: 1.3rem;
             font-weight: 500;
+            text-shadow: 0 0 10px rgba(181, 122, 255, 0.3);
         }
 
         .team-member {
@@ -126,48 +171,45 @@
             opacity: 0;
             transform: translateX(-10px);
             animation: memberEntry 0.4s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+            position: relative;
+        }
+
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes buttonGlow {
+            0% { transform: rotate(45deg) translate(-50%, -50%); }
+            100% { transform: rotate(45deg) translate(150%, 150%); }
+        }
+
+        @keyframes teamGlow {
+            0% { left: -100%; }
+            100% { left: 200%; }
         }
 
         @keyframes fadeSlideDown {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes teamEntry {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes memberEntry {
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
+            to { opacity: 1; transform: translateX(0); }
         }
 
         @keyframes fadeIn {
-            to {
-                opacity: 1;
-            }
+            to { opacity: 1; }
         }
 
         @media (max-width: 768px) {
-            body {
-                padding: 1.2rem;
-            }
-            
-            .container {
-                padding: 1.5rem;
-                border-radius: 16px;
-            }
-            
-            h1 {
-                font-size: 2.2rem;
-            }
+            body { padding: 1.2rem; }
+            .container { padding: 1.5rem; border-radius: 16px; }
+            h1 { font-size: 2.2rem; }
         }
     </style>
 </head>
@@ -182,6 +224,10 @@
                 <button onclick="generateTeams(4)">4 Teams</button>
                 <button onclick="generateTeams(6)">6 Teams</button>
             </div>
+            <div class="custom-team-input">
+                <input type="number" id="customTeamCount" placeholder="#" min="1">
+                <button onclick="generateCustomTeams()">Custom Teams</button>
+            </div>
         </div>
 
         <div id="teamsContainer" class="teams-container"></div>
@@ -189,6 +235,19 @@
 
     <script>
         function generateTeams(teamCount) {
+            processTeams(teamCount);
+        }
+
+        function generateCustomTeams() {
+            const teamCount = parseInt(document.getElementById('customTeamCount').value);
+            if (teamCount > 0) {
+                processTeams(teamCount);
+            } else {
+                alert('Please enter a valid team number!');
+            }
+        }
+
+        function processTeams(teamCount) {
             const namesInput = document.getElementById('namesInput').value;
             const names = namesInput.split(/[\n,]+/).map(name => name.trim()).filter(name => name);
             
@@ -197,7 +256,7 @@
                 return;
             }
 
-            // Shuffle names using Fisher-Yates algorithm
+            // Improved shuffle algorithm
             const shuffledNames = [...names];
             for (let i = shuffledNames.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -224,7 +283,9 @@
                 teamDiv.innerHTML = `
                     <h3>Team ${index + 1}</h3>
                     ${team.map((member, memberIndex) => `
-                        <div class="team-member" style="animation-delay: ${memberIndex * 0.05 + index * 0.1}s">${member}</div>
+                        <div class="team-member" style="animation-delay: ${memberIndex * 0.05 + index * 0.1}s">
+                            ${member}
+                        </div>
                     `).join('')}
                 `;
                 container.appendChild(teamDiv);
