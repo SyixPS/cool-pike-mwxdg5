@@ -13,20 +13,20 @@
         }
 
         body {
-            background: #0a0a0a;
+            background: linear-gradient(160deg, #0a0a0a, #1a1a1a);
             min-height: 100vh;
             padding: 2rem;
             color: #ffffff;
-            overflow-x: hidden;
         }
 
         .container {
             max-width: 800px;
             margin: 0 auto;
-            background: rgba(20, 20, 20, 0.95);
+            background: rgba(20, 20, 20, 0.9);
             padding: 2.5rem;
             border-radius: 20px;
-            border: 1px solid rgba(138, 43, 226, 0.2);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
@@ -36,15 +36,18 @@
             font-size: 2.8rem;
             font-weight: 600;
             letter-spacing: -0.5px;
-            background: linear-gradient(45deg, #8A2BE2, #9400D3);
+            background: linear-gradient(45deg, #8A2BE2, #9400D3, #6A1B9A);
+            background-size: 200% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 20px rgba(138, 43, 226, 0.4);
-            animation: textPulse 3s ease-in-out infinite;
+            animation: gradientFlow 4s linear infinite;
+            text-shadow: 0 0 15px rgba(138, 43, 226, 0.4);
         }
 
         .input-section {
             margin-bottom: 2rem;
+            opacity: 0;
+            animation: fadeIn 0.6s 0.3s forwards;
         }
 
         textarea {
@@ -57,7 +60,7 @@
             font-size: 1rem;
             min-height: 150px;
             resize: vertical;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
         }
 
         .custom-team-input {
@@ -75,6 +78,13 @@
             border-radius: 8px;
             color: #ffffff;
             text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .custom-team-input input:focus {
+            outline: none;
+            border-color: #8A2BE2;
+            box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.2);
         }
 
         .buttons {
@@ -93,14 +103,27 @@
             color: white;
             font-weight: 500;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            transform: scale(1);
             position: relative;
             overflow: hidden;
         }
 
+        button::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            animation: buttonGlow 2s infinite;
+        }
+
         button:hover {
             transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(138, 43, 226, 0.4);
+            box-shadow: 0 8px 20px rgba(138, 43, 226, 0.3);
         }
 
         .teams-container {
@@ -110,13 +133,25 @@
         }
 
         .team {
-            background: rgba(40, 40, 40, 0.8);
+            background: rgba(40, 40, 40, 0.6);
             padding: 1.8rem;
             border-radius: 16px;
             border: 1px solid rgba(138, 43, 226, 0.2);
             opacity: 0;
             transform: translateY(20px);
             animation: teamEntry 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+            position: relative;
+        }
+
+        .team::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(138, 43, 226, 0.1), transparent);
+            animation: teamGlow 2s infinite;
         }
 
         .team h3 {
@@ -124,6 +159,7 @@
             margin-bottom: 1.2rem;
             font-size: 1.3rem;
             font-weight: 500;
+            text-shadow: 0 0 10px rgba(181, 122, 255, 0.3);
         }
 
         .team-member {
@@ -131,14 +167,31 @@
             margin: 0.5rem 0;
             background: rgba(138, 43, 226, 0.1);
             border-radius: 8px;
+            border: 1px solid rgba(138, 43, 226, 0.2);
             opacity: 0;
             transform: translateX(-10px);
-            animation: memberEntry 0.4s ease forwards;
+            animation: memberEntry 0.4s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+            position: relative;
         }
 
-        @keyframes textPulse {
-            0%, 100% { text-shadow: 0 0 20px rgba(138, 43, 226, 0.4); }
-            50% { text-shadow: 0 0 30px rgba(138, 43, 226, 0.6); }
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes buttonGlow {
+            0% { transform: rotate(45deg) translate(-50%, -50%); }
+            100% { transform: rotate(45deg) translate(150%, 150%); }
+        }
+
+        @keyframes teamGlow {
+            0% { left: -100%; }
+            100% { left: 200%; }
+        }
+
+        @keyframes fadeSlideDown {
+            to { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes teamEntry {
@@ -149,10 +202,14 @@
             to { opacity: 1; transform: translateX(0); }
         }
 
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
         @media (max-width: 768px) {
-            body { padding: 1rem; }
-            .container { padding: 1.5rem; }
-            h1 { font-size: 2rem; }
+            body { padding: 1.2rem; }
+            .container { padding: 1.5rem; border-radius: 16px; }
+            h1 { font-size: 2.2rem; }
         }
     </style>
 </head>
@@ -199,13 +256,11 @@
                 return;
             }
 
-            // Optimized shuffle
+            // Improved shuffle algorithm
             const shuffledNames = [...names];
-            let currentIndex = shuffledNames.length;
-            while (currentIndex) {
-                const randomIndex = Math.floor(Math.random() * currentIndex--);
-                [shuffledNames[currentIndex], shuffledNames[randomIndex]] = 
-                [shuffledNames[randomIndex], shuffledNames[currentIndex]];
+            for (let i = shuffledNames.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledNames[i], shuffledNames[j]] = [shuffledNames[j], shuffledNames[i]];
             }
             
             // Create teams
@@ -220,27 +275,21 @@
         function displayTeams(teams) {
             const container = document.getElementById('teamsContainer');
             container.innerHTML = '';
-            
-            // Batch DOM updates
-            const fragment = document.createDocumentFragment();
-            
+
             teams.forEach((team, index) => {
                 const teamDiv = document.createElement('div');
                 teamDiv.className = 'team';
-                teamDiv.style.animationDelay = `${index * 50}ms`;
+                teamDiv.style.animationDelay = `${index * 0.1}s`;
                 teamDiv.innerHTML = `
                     <h3>Team ${index + 1}</h3>
                     ${team.map((member, memberIndex) => `
-                        <div class="team-member" 
-                             style="animation-delay: ${memberIndex * 50 + index * 50}ms">
+                        <div class="team-member" style="animation-delay: ${memberIndex * 0.05 + index * 0.1}s">
                             ${member}
                         </div>
                     `).join('')}
                 `;
-                fragment.appendChild(teamDiv);
+                container.appendChild(teamDiv);
             });
-            
-            container.appendChild(fragment);
         }
     </script>
 </body>
